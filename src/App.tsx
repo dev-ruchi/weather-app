@@ -31,23 +31,51 @@ type opendatasoftResponse = {
   results: City[];
 };
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
+  const [cities, setCities] = useState<City[]>([]);
   useEffect(() => {
     fetch(
       `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/records?limit=50`
     )
       .then((res) => res.json())
       .then((data: opendatasoftResponse) => {
-        console.log(data.results);
+        setCities(data.results);
       });
   }, []);
 
   return (
     <>
-      <h1 className="text-3xl font-bold underline">Hello world!</h1>
+      <h1 className="text-3xl font-bold mb-8">
+        All Cities with a population &gt; 1000
+      </h1>
+
+      <div className="overflow-x-auto">
+        <table className="table table-xs">
+          <thead>
+            <tr>
+              <th></th>
+              <th>City</th>
+              <th>Country</th>
+              <th>TimeZone</th>
+              <th>Country code</th>
+            </tr>
+          </thead>
+          <tbody>
+            {cities.map((city, index) => (
+              <tr key={city.geoname_id}>
+                <th>{index + 1}</th>
+                <td>{city.name}</td>
+                <td>{city.cou_name_en}</td>
+                <td>{city.timezone}</td>
+                <td>{city.country_code}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }
