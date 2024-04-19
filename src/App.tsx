@@ -28,28 +28,28 @@ type City = {
 
 type opendatasoftResponse = {
   total_count: number;
-  results: City[]
-}
+  results: City[];
+};
 
-
-import { useEffect } from 'react'
-import './App.css'
+import { useEffect } from "react";
+import "./App.css";
 
 function App() {
-
   useEffect(() => {
-    fetch(`https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/records?limit=50`)
-    .then(res => res.json())
-    .then((data: opendatasoftResponse) => {
-      console.log(data.results)
-    })
-  }, [])
+    fetch(
+      `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/records?limit=50`
+    )
+      .then((res) => res.json())
+      .then((data: opendatasoftResponse) => {
+        console.log(data.results);
+      });
+  }, []);
 
   return (
     <>
-      
+      <h1 className="text-3xl font-bold underline">Hello world!</h1>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
