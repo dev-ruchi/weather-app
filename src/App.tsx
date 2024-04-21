@@ -36,7 +36,7 @@ import "./App.css";
 
 function App() {
   const [cities, setCities] = useState<City[]>([]);
-  const [offset, setOffset] = useState(1);
+  const [offset, setOffset] = useState(0);
 
   useEffect(() => {
     setupScrollObserver();
@@ -47,15 +47,12 @@ function App() {
   }, [offset]);
 
   function fetchCities() {
-    console.log(offset);
     fetch(
-      `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/records?limit=100&offset=${
-        offset * 100
-      }`
+      `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/records?limit=100&offset=${offset}`
     )
       .then((res) => res.json())
       .then((data: opendatasoftResponse) => {
-        setCities([...cities, ...data.results]);
+        setCities((prev) => [...prev, ...data.results]);
       });
   }
 
@@ -67,7 +64,7 @@ function App() {
     const intersectionObserver = new IntersectionObserver((entries) => {
       if (entries[0].intersectionRatio <= 0) return;
 
-      setOffset((prevOffset) => prevOffset + 1);
+      setOffset((prevOffset) => prevOffset + 100);
     });
 
     intersectionObserver.observe(el);
