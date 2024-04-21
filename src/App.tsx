@@ -37,6 +37,7 @@ import "./App.css";
 function App() {
   const [cities, setCities] = useState<City[]>([]);
   const [offset, setOffset] = useState(0);
+  const [fetchingCities, setFetchingCities] = useState(false);
 
   useEffect(() => {
     setupScrollObserver();
@@ -47,13 +48,15 @@ function App() {
   }, [offset]);
 
   function fetchCities() {
+    setFetchingCities(true);
     fetch(
       `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/records?limit=100&offset=${offset}`
     )
       .then((res) => res.json())
       .then((data: opendatasoftResponse) => {
         setCities((prev) => [...prev, ...data.results]);
-      });
+      })
+      .finally(() => setFetchingCities(false));
   }
 
   function setupScrollObserver() {
@@ -99,6 +102,12 @@ function App() {
             ))}
           </tbody>
         </table>
+
+        {fetchingCities && (
+          <div className="flex items-center justify-center h-10">
+            <span className="loading loading-dots loading-lg"></span>
+          </div>
+        )}
 
         <div id="scroll-observer"></div>
       </div>
