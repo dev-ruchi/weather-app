@@ -36,15 +36,42 @@ import "./App.css";
 
 function App() {
   const [cities, setCities] = useState<City[]>([]);
+  const [offset, setOffset] = useState(1);
+
   useEffect(() => {
+    setupScrollObserver();
+  }, []);
+
+  useEffect(() => {
+    fetchCities();
+  }, [offset]);
+
+  function fetchCities() {
+    console.log(offset);
     fetch(
-      `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/records?limit=50`
+      `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/records?limit=100&offset=${
+        offset * 100
+      }`
     )
       .then((res) => res.json())
       .then((data: opendatasoftResponse) => {
-        setCities(data.results);
+        setCities([...cities, ...data.results]);
       });
-  }, []);
+  }
+
+  function setupScrollObserver() {
+    const el = document.querySelector("#scroll-observer");
+
+    if (!el) return;
+
+    const intersectionObserver = new IntersectionObserver((entries) => {
+      if (entries[0].intersectionRatio <= 0) return;
+
+      setOffset((prevOffset) => prevOffset + 1);
+    });
+
+    intersectionObserver.observe(el);
+  }
 
   return (
     <>
@@ -65,7 +92,7 @@ function App() {
           </thead>
           <tbody>
             {cities.map((city, index) => (
-              <tr key={city.geoname_id}>
+              <tr key={`city-${index}`}>
                 <th>{index + 1}</th>
                 <td>{city.name}</td>
                 <td>{city.cou_name_en}</td>
@@ -75,6 +102,8 @@ function App() {
             ))}
           </tbody>
         </table>
+
+        <div id="scroll-observer"></div>
       </div>
     </>
   );
