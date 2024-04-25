@@ -32,7 +32,9 @@ type opendatasoftResponse = {
 };
 
 import { useEffect, useState } from "react";
+import { Outlet } from "react-router-dom";
 import "./App.css";
+import { Link } from "react-router-dom";
 
 function App() {
   const [cities, setCities] = useState<City[]>([]);
@@ -75,6 +77,9 @@ function App() {
 
   return (
     <>
+      <div>
+        <Outlet />
+      </div>
       <h1 className="text-3xl font-bold mb-8">
         All Cities with a population &gt; 1000
       </h1>
@@ -94,7 +99,14 @@ function App() {
             {cities.map((city, index) => (
               <tr key={`city-${index}`}>
                 <th>{index + 1}</th>
-                <td>{city.name}</td>
+                {/* /weather?lat=45.90&lon=56.78 */}
+                <td>
+                  <Link
+                    to={`/weather?lat=${city.coordinates.lat}&lon=${city.coordinates.lon}`}
+                  >
+                    {city.name}
+                  </Link>
+                </td>
                 <td>{city.cou_name_en}</td>
                 <td>{city.timezone}</td>
                 <td>{city.country_code}</td>
