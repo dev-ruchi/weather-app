@@ -40,6 +40,7 @@ function App() {
   const [cities, setCities] = useState<City[]>([]);
   const [offset, setOffset] = useState(0);
   const [fetchingCities, setFetchingCities] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     setupScrollObserver();
@@ -77,6 +78,14 @@ function App() {
     intersectionObserver.observe(el);
   }
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+  };
+
+  const filteredCities = cities.filter((city) =>
+    city.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <>
       <div>
@@ -85,6 +94,14 @@ function App() {
       <h1 className="text-3xl font-bold mb-8">
         All Cities with a population &gt; 1000
       </h1>
+
+      <input
+        type="text"
+        value={searchQuery}
+        onChange={handleSearchChange}
+        placeholder="Search city..."
+        className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:border-gray-500"
+      />
 
       <div className="overflow-x-auto">
         <table className="table table-xs">
@@ -98,7 +115,7 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {cities.map((city, index) => (
+            {filteredCities.map((city, index) => (
               <tr key={`city-${index}`}>
                 <th>{index + 1}</th>
                 {/* /weather?lat=45.90&lon=56.78 */}
