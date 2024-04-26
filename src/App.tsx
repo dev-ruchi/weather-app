@@ -56,6 +56,8 @@ function App() {
     )
       .then((res) => res.json())
       .then((data: opendatasoftResponse) => {
+        console.log(data);
+
         setCities((prev) => [...prev, ...data.results]);
       })
       .finally(() => setFetchingCities(false));

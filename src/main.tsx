@@ -16,6 +16,7 @@ const router = createBrowserRouter([
         path: "/weather",
         element: <Weather />,
       },
+      
     ],
   },
 ]);
@@ -26,4 +27,4 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <RouterProvider router={router} />
   </div>
   // </React.StrictMode>
-);  
+);
