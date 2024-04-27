@@ -50,6 +50,21 @@ function App() {
     fetchCities();
   }, [offset]);
 
+  useEffect(() => {
+    if (searchQuery) searchCity();
+  }, [searchQuery]);
+
+  function searchCity() {
+    fetch(
+      `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/records?where=search(ascii_name,%20%27{${searchQuery}}%27)`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setCities(data.results);
+        console.log(data.results);
+      });
+  }
+
   function fetchCities() {
     setFetchingCities(true);
     fetch(
@@ -57,7 +72,6 @@ function App() {
     )
       .then((res) => res.json())
       .then((data: opendatasoftResponse) => {
-        console.log(data);
 
         setCities((prev) => [...prev, ...data.results]);
       })
@@ -78,14 +92,6 @@ function App() {
     intersectionObserver.observe(el);
   }
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value);
-  };
-
-  const filteredCities = cities.filter((city) =>
-    city.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   return (
     <>
       <div>
@@ -98,7 +104,7 @@ function App() {
       <input
         type="text"
         value={searchQuery}
-        onChange={handleSearchChange}
+        onChange={(e) => setSearchQuery(e.target.value)}
         placeholder="Search city..."
         className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:border-gray-500"
       />
@@ -115,7 +121,7 @@ function App() {
             </tr>
           </thead>
           <tbody>
-            {filteredCities.map((city, index) => (
+            {cities.map((city, index) => (
               <tr key={`city-${index}`}>
                 <th>{index + 1}</th>
                 {/* /weather?lat=45.90&lon=56.78 */}
