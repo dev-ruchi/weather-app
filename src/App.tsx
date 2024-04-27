@@ -30,11 +30,13 @@ type opendatasoftResponse = {
   total_count: number;
   results: City[];
 };
+import debounce from "lodash.debounce";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
-import "./App.css";
 import { Link } from "react-router-dom";
+
+import "./App.css";
 
 function App() {
   const [cities, setCities] = useState<City[]>([]);
@@ -51,19 +53,22 @@ function App() {
   }, [offset]);
 
   useEffect(() => {
-    if (searchQuery) searchCity();
+    if (!searchQuery) return;
+    searchCity(searchQuery);
   }, [searchQuery]);
 
-  function searchCity() {
-    fetch(
-      `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/records?where=search(ascii_name,%20%27{${searchQuery}}%27)`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        setCities(data.results);
-        console.log(data.results);
-      });
-  }
+  const searchCity = useCallback(
+    debounce((query) => {
+      fetch(
+        `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/records?where=search(ascii_name,%20%27{${query}}%27)`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          setCities(data.results);
+        });
+    }, 2000),
+    []
+  );
 
   function fetchCities() {
     setFetchingCities(true);
@@ -72,7 +77,6 @@ function App() {
     )
       .then((res) => res.json())
       .then((data: opendatasoftResponse) => {
-
         setCities((prev) => [...prev, ...data.results]);
       })
       .finally(() => setFetchingCities(false));
