@@ -144,13 +144,12 @@ function App() {
           </tbody>
         </table>
 
-        {fetchingCities && (
-          <div className="flex items-center justify-center h-10">
-            <span className="loading loading-dots loading-lg"></span>
-          </div>
-        )}
-
-        <div id="scroll-observer"></div>
+        <div
+          id="scroll-observer"
+          className="flex items-center justify-center h-24"
+        >
+          <span className="loading loading-dots loading-lg"></span>
+        </div>
       </div>
     </>
   );
