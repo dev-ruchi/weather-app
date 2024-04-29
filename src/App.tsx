@@ -33,7 +33,6 @@ type opendatasoftResponse = {
 import debounce from "lodash.debounce";
 
 import { useCallback, useEffect, useState } from "react";
-import { Outlet } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 import "./App.css";
@@ -41,6 +40,7 @@ import "./App.css";
 function App() {
   const [cities, setCities] = useState<City[]>([]);
   const [offset, setOffset] = useState(0);
+  const [failed, setFailed] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
@@ -61,22 +61,46 @@ function App() {
       fetch(
         `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/records?where=search(ascii_name,%20%27{${query}}%27)`
       )
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            setFailed(true);
+          }
+          return res.json();
+        })
         .then((data) => {
           setCities(data.results);
+        })
+        .catch((e) => {
+          console.log(e);
+          setFailed(true);
         });
     }, 2000),
     []
   );
 
+  function retry() {
+    setFailed(false);
+    fetchCities();
+  }
+
   function fetchCities() {
     fetch(
       `https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/geonames-all-cities-with-a-population-1000/records?limit=100&offset=${offset}`
     )
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          setFailed(true);
+        }
+
+        return res.json();
+      })
       .then((data: opendatasoftResponse) => {
         setCities((prev) => [...prev, ...data.results]);
       })
+      .catch((e) => {
+        console.log(e);
+        setFailed(true);
+      });
   }
 
   function setupScrollObserver() {
@@ -95,9 +119,6 @@ function App() {
 
   return (
     <>
-      <div>
-        <Outlet />
-      </div>
       <h1 className="text-3xl font-bold mb-8">
         All Cities with a population &gt; 1000
       </h1>
@@ -110,44 +131,53 @@ function App() {
         className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:border-gray-500"
       />
 
-      <div className="overflow-x-auto">
-        <table className="table table-xs">
-          <thead>
-            <tr>
-              <th></th>
-              <th>City</th>
-              <th>Country</th>
-              <th>TimeZone</th>
-              <th>Country code</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cities.map((city, index) => (
-              <tr key={`city-${index}`}>
-                <th>{index + 1}</th>
-                {/* /weather?lat=45.90&lon=56.78 */}
-                <td>
-                  <Link
-                    to={`/weather?lat=${city.coordinates.lat}&lon=${city.coordinates.lon}`}
-                  >
-                    {city.name}
-                  </Link>
-                </td>
-                <td>{city.cou_name_en}</td>
-                <td>{city.timezone}</td>
-                <td>{city.country_code}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-
-        <div
-          id="scroll-observer"
-          className="flex items-center justify-center h-24"
-        >
-          <span className="loading loading-dots loading-lg"></span>
+      {failed ? (
+        <div className="my-4">
+          <p className="mb-4">Something went wrong.</p>
+          <button className="btn btn-primary" onClick={retry}>
+            Retry
+          </button>
         </div>
-      </div>
+      ) : (
+        <div className="overflow-x-auto">
+          <table className="table table-xs">
+            <thead>
+              <tr>
+                <th></th>
+                <th>City</th>
+                <th>Country</th>
+                <th>TimeZone</th>
+                <th>Country code</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cities.map((city, index) => (
+                <tr key={`city-${index}`}>
+                  <th>{index + 1}</th>
+                  {/* /weather?lat=45.90&lon=56.78 */}
+                  <td>
+                    <Link
+                      to={`/weather?lat=${city.coordinates.lat}&lon=${city.coordinates.lon}`}
+                    >
+                      {city.name}
+                    </Link>
+                  </td>
+                  <td>{city.cou_name_en}</td>
+                  <td>{city.timezone}</td>
+                  <td>{city.country_code}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div
+            id="scroll-observer"
+            className="flex items-center justify-center h-24"
+          >
+            <span className="loading loading-dots loading-lg"></span>
+          </div>
+        </div>
+      )}
     </>
   );
 }
